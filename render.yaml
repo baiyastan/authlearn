@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: auth-learn
+    runtime: python
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: auth-learn-db
+          property: connectionString
+
+databases:
+  - name: auth-learn-db
+    plan: free
