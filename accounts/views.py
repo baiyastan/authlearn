@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
@@ -96,6 +97,11 @@ class LogoutView(APIView):
         except KeyError:
             return Response(
                 {"detail": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except TokenError:
+            return Response(
+                {"detail": "Token is invalid or expired."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
