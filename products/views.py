@@ -1,3 +1,4 @@
+from django.db import models
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 
@@ -13,10 +14,26 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
-    """Бардык продуктуларды көрүү жана жаңы продукт кошуу."""
-    queryset = Product.objects.select_related("owner", "category").prefetch_related("images").order_by("-created_at")
+    """Бардык продуктуларды көрүү жана жаңы продукт кошуу.
+
+    Query параметрлери:
+        search — name же description боюнча издөө
+        category — category id боюнча фильтр
+    """
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Product.objects.select_related("owner", "category").prefetch_related("images").order_by("-created_at")
+        search = self.request.query_params.get("search")
+        if search:
+            qs = qs.filter(
+                models.Q(name__icontains=search) | models.Q(description__icontains=search)
+            )
+        category = self.request.query_params.get("category")
+        if category:
+            qs = qs.filter(category_id=category)
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
