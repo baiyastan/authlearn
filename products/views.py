@@ -11,6 +11,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
